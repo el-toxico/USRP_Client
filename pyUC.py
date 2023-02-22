@@ -17,6 +17,14 @@
 # OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 # PERFORMANCE OF THIS SOFTWARE.
 ###################################################################################
+# This is the KF6TPT fork, established 2023.
+# Any bugs here are mine; do not bother the original author if you're 
+# running this (poorly written, rarely maintained) fork.
+#
+# Changes:
+#  - Use control keys for PTT
+#  - Turn transmit button red when transmitting
+###################################################################################
 
 from tkinter import *
 from tkinter import ttk
@@ -43,7 +51,7 @@ import hashlib
 from tkinter import font
 import sys
 
-UC_VERSION = "1.2.3"
+UC_VERSION = "1.2.3-TPT"
 
 ###################################################################################
 # Declare input and output ports for communication with AB
@@ -112,7 +120,7 @@ uc_text_color = "white"
 ###################################################################################
 # Strings
 ###################################################################################
-STRING_USRP_CLIENT = "USRP Client"
+STRING_USRP_CLIENT = "pyUC USRP Client"
 STRING_FATAL_ERROR = "fatal error, python package not found: "
 STRING_TALKGROUP = "Talk Group"
 STRING_OK = "OK"
@@ -253,14 +261,13 @@ def key_press(key):
     #logging.info("Key pressed: {0}".format(key))
     if key.keycode == 17 and ctrl_is_ptt:
         if (not ptt):
-            transmit()
+            toggle_transmit()
             
-
 def key_release(key):
     #logging.info("Key unpressed: {0}".format(key))
     if key.keycode == 17 and ctrl_is_ptt:
         if (ptt):
-            transmit()
+            toggle_transmit()
 
 ###################################################################################
 # Log output to console
@@ -1077,7 +1084,7 @@ def sendValuesToServer():
 ###################################################################################
 # Toggle PTT and display new state
 ###################################################################################
-def transmit():
+def toggle_transmit():
     global ptt
     
     if (transmit_enable == False) and (ptt == False):  # Do not allow transmit key if rx is active
@@ -1095,7 +1102,6 @@ def transmit():
 def showPTTState(flag):
     global tx_start_time
     if ptt:
-        transmitButton.configure(highlightbackground='red')
         transmitButton.configure(background="red")
         ttk.Style(root).configure("bar.Horizontal.TProgressbar", troughcolor=uc_background_color, bordercolor=uc_text_color, background="red", lightcolor="red", darkcolor="red")
         tx_start_time = time()
@@ -1103,7 +1109,6 @@ def showPTTState(flag):
         html_queue.put((my_call, ""))     # Show my own pic when I transmit
         logging.info("PTT ON")
     else:
-        transmitButton.configure(highlightbackground=uc_background_color)
         transmitButton.configure(background="SystemButtonFace")
         ttk.Style(root).configure("bar.Horizontal.TProgressbar", troughcolor=uc_background_color, bordercolor=uc_text_color, background="green", lightcolor="green", darkcolor="green")
         if flag == 1:
@@ -1271,7 +1276,7 @@ def makeLogFrame( parent ):
 def makeTransmitFrame(parent):
     global transmitButton
     transmitFrame = Frame(parent, pady = 5, padx = 5, bg = uc_background_color, bd = 1)
-    transmitButton = Button(transmitFrame, text=STRING_TRANSMIT, command=transmit, width = 40, font='Helvetica 18 bold', state='disabled')
+    transmitButton = Button(transmitFrame, text=STRING_TRANSMIT, command=toggle_transmit, width = 40, font='Helvetica 18 bold', state='disabled')
     transmitButton.grid(column=1, row=1, sticky=W)
     transmitButton.configure(highlightbackground=uc_background_color)
 
@@ -1290,7 +1295,7 @@ def makeTransmitFrame(parent):
 def clickQRZImage(event):
     call = event.widget.callsign
     if len(call) > 0:
-        webbrowser.open_new_tab("http://www.qrz.com/lookup/"+call)
+        webbrowser.open_new_tab("https://www.qrz.com/lookup/"+call)
 
 def makeQRZFrame(parent):
     global qrz_label, qrz_call, qrz_name
