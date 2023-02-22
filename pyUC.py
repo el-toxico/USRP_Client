@@ -172,7 +172,9 @@ STRING_LOOPBACK = "Loopback"
 STRING_IP_ADDRESS = "IP Address"
 STRING_PRIVATE = "Private"
 STRING_GROUP = "Group"
-STRING_TRANSMIT = "Transmit"
+STRING_PTT = "PTT"
+STRING_TRANSMITTING = "Transmitting"
+STRING_RECEIVING = "Receiving"
 
 ###################################################################################
 # HTML/QRZ import libraries
@@ -479,6 +481,7 @@ def rxAudioStream():
                     if keyup == False:
                         log_end_of_transmission(call, rxslot, tg, loss, start_time)
                         transmit_enable = True  # Idle state, allow local transmit
+                        transmitButton.configure(background="SystemButtonFace", text=STRING_PTT)
                         audio_level.set(0)
                 lastKey = keyup
             elif (type == USRP_TYPE_TEXT): #metadata
@@ -539,6 +542,7 @@ def rxAudioStream():
                     if audio[0] == TLV_TAG_SET_INFO:
                         if transmit_enable == False:    #EOT missed?
                             log_end_of_transmission(call, rxslot, tg, loss, start_time)
+                            transmitButton.configure(background="SystemButtonFace", text=STRING_PTT)
                         rid = (audio[2] << 16) + (audio[3] << 8) + audio[4] # Source
                         tg = (audio[9] << 16) + (audio[10] << 8) + audio[11] # Dest
                         rxslot = audio[12]
@@ -564,6 +568,7 @@ def rxAudioStream():
                         current_tx_value.set('{} -> {}'.format(call, tg))
                         logging.info('Begin TX: {} {} {} {}'.format(call, rxslot, tg, mode))
                         transmit_enable = False # Transmission from network will disable local transmit
+                        transmitButton.configure(background='green', text=STRING_RECEIVING)
                         if call.isdigit() == False:
                             html_queue.put((call, name))
                         if ((rxcc  & 0x80) and (rid > 10000)): # > 10000 to exclude "4000" from BM
@@ -583,6 +588,7 @@ def rxAudioStream():
                         logging.info("missed EOT")
                         log_end_of_transmission(call, rxslot, tg, loss, start_time)
                         transmit_enable = True  # Idle state, allow local transmit
+                        transmitButton.configure(background="SystemButtonFace", text=STRING_PTT)
                     lastSeq = seq
 #                logging.debug(audio[:audio.find('\x00')])
                 pass
@@ -1102,14 +1108,14 @@ def toggle_transmit():
 def showPTTState(flag):
     global tx_start_time
     if ptt:
-        transmitButton.configure(background="red")
+        transmitButton.configure(background="red", text=STRING_TRANSMITTING)
         ttk.Style(root).configure("bar.Horizontal.TProgressbar", troughcolor=uc_background_color, bordercolor=uc_text_color, background="red", lightcolor="red", darkcolor="red")
         tx_start_time = time()
         current_tx_value.set('{} -> {}'.format(my_call, getCurrentTG()))
         html_queue.put((my_call, ""))     # Show my own pic when I transmit
         logging.info("PTT ON")
     else:
-        transmitButton.configure(background="SystemButtonFace")
+        transmitButton.configure(background="SystemButtonFace", text=STRING_PTT)
         ttk.Style(root).configure("bar.Horizontal.TProgressbar", troughcolor=uc_background_color, bordercolor=uc_text_color, background="green", lightcolor="green", darkcolor="green")
         if flag == 1:
             _date = strftime("%m/%d/%y", localtime(time()))
@@ -1276,7 +1282,7 @@ def makeLogFrame( parent ):
 def makeTransmitFrame(parent):
     global transmitButton
     transmitFrame = Frame(parent, pady = 5, padx = 5, bg = uc_background_color, bd = 1)
-    transmitButton = Button(transmitFrame, text=STRING_TRANSMIT, command=toggle_transmit, width = 40, font='Helvetica 18 bold', state='disabled')
+    transmitButton = Button(transmitFrame, text=STRING_PTT, command=toggle_transmit, width = 40, font='Helvetica 18 bold', state='disabled')
     transmitButton.grid(column=1, row=1, sticky=W)
     transmitButton.configure(highlightbackground=uc_background_color)
 
