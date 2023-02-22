@@ -96,6 +96,7 @@ ptt = False                         # Current ptt state
 tx_start_time = 0                   # TX timer
 done = False                        # Thread stop flag
 transmit_enable = True              # Make sure that UC is half duplex
+ctrl_is_ptt = True                  # Use control key for PTT
 useQRZ = True
 level_every_sample = 1
 NAT_ping_timer = 0
@@ -246,6 +247,20 @@ def ping_thread():
     while done == False:
         sleep(20.0)
         sendUSRPCommand(bytes("PING", 'ASCII'), USRP_TYPE_PING)
+
+###################################################################################
+def key_press(key):
+    #logging.info("Key pressed: {0}".format(key))
+    if key.keycode == 17 and ctrl_is_ptt:
+        if (not ptt):
+            transmit()
+            
+
+def key_release(key):
+    #logging.info("Key unpressed: {0}".format(key))
+    if key.keycode == 17 and ctrl_is_ptt:
+        if (ptt):
+            transmit()
 
 ###################################################################################
 # Log output to console
@@ -1081,6 +1096,7 @@ def showPTTState(flag):
     global tx_start_time
     if ptt:
         transmitButton.configure(highlightbackground='red')
+        transmitButton.configure(background="red")
         ttk.Style(root).configure("bar.Horizontal.TProgressbar", troughcolor=uc_background_color, bordercolor=uc_text_color, background="red", lightcolor="red", darkcolor="red")
         tx_start_time = time()
         current_tx_value.set('{} -> {}'.format(my_call, getCurrentTG()))
@@ -1088,6 +1104,7 @@ def showPTTState(flag):
         logging.info("PTT ON")
     else:
         transmitButton.configure(highlightbackground=uc_background_color)
+        transmitButton.configure(background="SystemButtonFace")
         ttk.Style(root).configure("bar.Horizontal.TProgressbar", troughcolor=uc_background_color, bordercolor=uc_text_color, background="green", lightcolor="green", darkcolor="green")
         if flag == 1:
             _date = strftime("%m/%d/%y", localtime(time()))
@@ -1632,6 +1649,8 @@ if NAT_ping_timer > 0:
 disconnect()    # Start out in the disconnected state
 start()         # Begin the handshake with AB (register)
 
+root.bind('<KeyPress>', key_press)
+root.bind('<KeyRelease>', key_release)
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()
 
