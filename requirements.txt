@@ -1,0 +1,5 @@
+beautifulsoup4==4.11.2
+Pillow==9.4.0
+PyAudio==0.2.11
+requests==2.26.0
+sv_ttk==2.4
