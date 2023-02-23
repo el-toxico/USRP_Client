@@ -34,7 +34,7 @@ Install instructions by platform:
     **pip install PyAudio-0.2.11-cp37-cp37m-win_XXX.whl   
     pip install bs4  
     pip install Pillow  
-    pip install sv_ttk
+    pip install sv_ttk  
     pip install requests**  
     Edit pyUC.ini
     
@@ -46,7 +46,7 @@ Install instructions by platform:
     Open a command prompt  
     **sudo apt-get install python3-pyaudio  
     sudo apt-get install portaudio19-dev  
-    sudo apt-get install python3-pil.imagetk
+    sudo apt-get install python3-pil.imagetk  
     pip3 install sv_ttk**  
     Edit pyUC.ini
 
@@ -56,7 +56,7 @@ Install instructions by platform:
     brew install python  
     brew install portaudio  
     pip3 install pyaudio  
-    pip3 install sv_ttk
+    pip3 install sv_ttk  
     pip3 install bs4 Pillow requests**  
     Edit pyUC.ini
 
