@@ -109,7 +109,7 @@ tx_start_time = 0                   # TX timer
 done = False                        # Thread stop flag
 transmit_enable = True              # Make sure that UC is half duplex
 ctrl_is_ptt = True                  # Use control key for PTT
-use_dark_theme = False
+use_dark_theme = True
 useQRZ = True
 level_every_sample = 1
 NAT_ping_timer = 0
@@ -1554,7 +1554,7 @@ def popupFocusOut(self,event=None):
 
 root = Tk()
 root.title(STRING_USRP_CLIENT)
-root.resizable(width=TRUE, height=TRUE)
+root.resizable(width=FALSE, height=FALSE)
 
 nb = ttk.Notebook(root)     # A tabbed interface container
 
