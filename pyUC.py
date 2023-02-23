@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 ###################################################################################
 # pyUC ("puck")
 # Copyright (C) 2014, 2015, 2016, 2019, 2020 N4IRR
@@ -106,7 +106,7 @@ tx_start_time = 0                   # TX timer
 done = False                        # Thread stop flag
 transmit_enable = True              # Make sure that UC is half duplex
 ctrl_is_ptt = True                  # Use control key for PTT
-use_dark_theme = True
+use_dark_theme = False
 useQRZ = True
 level_every_sample = 1
 NAT_ping_timer = 0
@@ -263,7 +263,7 @@ def key_press(key):
     #logging.info("Key pressed: {0}".format(key))
 
     # Control as PTT button
-    if key.keycode == 17 and ctrl_is_ptt:
+    if (key.keysym == 'Control_L' or key.keysym == 'Control_R') and ctrl_is_ptt:
         if (not ptt):
             toggle_transmit()
     # T key brings up TG dialog
@@ -272,7 +272,7 @@ def key_press(key):
             
 def key_release(key):
     #logging.info("Key unpressed: {0}".format(key))
-    if key.keycode == 17 and ctrl_is_ptt:
+    if (key.keysym == 'Control_L' or key.keysym == 'Control_R') and ctrl_is_ptt:
         if (ptt):
             toggle_transmit()
 
