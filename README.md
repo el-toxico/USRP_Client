@@ -34,7 +34,7 @@ Install instructions by platform:
     **pip install PyAudio-0.2.11-cp37-cp37m-win_XXX.whl   
     pip install bs4  
     pip install Pillow  
-    pup install sv_ttk
+    pip install sv_ttk
     pip install requests**  
     Edit pyUC.ini
     
