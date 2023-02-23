@@ -120,7 +120,7 @@ uc_text_color = "white"
 ###################################################################################
 # Strings
 ###################################################################################
-STRING_USRP_CLIENT = "pyUC USRP Client"
+STRING_USRP_CLIENT = "pyUC USRP Client " + UC_VERSION
 STRING_FATAL_ERROR = "fatal error, python package not found: "
 STRING_TALKGROUP = "Talk Group"
 STRING_OK = "OK"
@@ -1407,33 +1407,15 @@ def makeAboutFrame( parent ):
     aboutText += "it is to be used for educational purposes only. Its use on\n"
     aboutText += "commercial networks is strictly prohibited.\n\n"
     aboutText += "Code improvements are encouraged, please\n"
-    aboutText += "contribute to the development branch located at"
-    linkText = "https://github.com/DVSwitch/USRP_Client\n"
+    aboutText += "contribute to the upstream development branch located at\n"
+    aboutText += "https://github.com/DVSwitch/USRP_Client\n\n"
+    aboutText += "This is the KF6TPT Fork, established 2023.\n"
+    aboutText += "https://github.com/el-toxico/USRP_Client/\n"
+    aboutText += "this fork also comes with ABSOLUTELY NO WARRANTY\n\n"
 
     background = None
-    try:
-        image_url = "https://media.boingboing.net/wp-content/uploads/2017/06/giphy-2.gif"
-        image_byt = urllib.request.urlopen(image_url).read()
-        image_b64 = base64.encodebytes(image_byt)
-        background = PhotoImage(data=image_b64)
-        background = background.subsample(3, 3)
-        lx = Label(aboutFrame, text="maz", anchor=W, image=background, cursor="hand2")
-        lx.photo = background
-        lx.callsign = "n4irr"
-        lx.bind("<Button-1>", clickQRZImage)
-        lx.grid(column=1, row=1, sticky=NW, padx = 5, pady = 5)
-
-    except:
-        logging.warning("no image:" + str(sys.exc_info()[1]))
     msg = Message(aboutFrame, text=aboutText, fg=uc_text_color, bg = uc_background_color, anchor=W, width=500)
     msg.grid(column=2, row=1, sticky=NW, padx = 5, pady = 0)
-
-    link = Label(aboutFrame, text=linkText, bg = uc_background_color, fg='blue', anchor=W, cursor="hand2")
-    link.grid(column=2, row=2, sticky=NW, padx = 5, pady = 0)
-    link.bind("<Button-1>", lambda e: webbrowser.open_new("https://github.com/DVSwitch/USRP_Client"))
-    f = font.Font(link, link.cget("font"))
-    f.configure(underline=True)
-    link.configure(font=f)
 
     return aboutFrame
 
