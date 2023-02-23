@@ -47,7 +47,7 @@ Install instructions by platform:
     **sudo apt-get install python3-pyaudio  
     sudo apt-get install portaudio19-dev  
     sudo apt-get install python3-pil.imagetk  
-    pip3 install sv_ttk**  
+    pip3 install sv_ttk bs4 Pillow requests**  
     Edit pyUC.ini
 
 - Mac
@@ -56,8 +56,7 @@ Install instructions by platform:
     brew install python  
     brew install portaudio  
     pip3 install pyaudio  
-    pip3 install sv_ttk  
-    pip3 install bs4 Pillow requests**  
+    pip3 install bs4 Pillow requests sv_ttk**  
     Edit pyUC.ini
 
 ## Contributing
