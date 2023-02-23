@@ -1,5 +1,12 @@
 
-# USRP_Client (pyUC)
+# USRP_Client (pyUC) - KF6TPT Fork.
+
+## This is a fork!
+This is a fork of https://github.com/DVSwitch/USRP_Client/ with changes that I think make it better for my use.
+These changes may make it worse for your use.  Use it at your own risk.
+
+Original Readme below:
+
 
 ## Introduction
 The pyUC python application is a GUI front end for accessing ham radio digital networks from your PC.  It is the front end app for the DVSwitch suite of software and connects to the Analog_Bridge component.
