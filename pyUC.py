@@ -52,6 +52,9 @@ import hashlib
 from tkinter import font
 import sys
 
+from ctypes import windll
+windll.shcore.SetProcessDpiAwareness(0)
+
 UC_VERSION = "1.2.3-TPT"
 
 ###################################################################################
@@ -1263,7 +1266,7 @@ def makeLogFrame( parent ):
     global logList
     logFrame = Frame(parent, pady = 5, padx = 5, bd = 1)
 
-    logList = ttk.Treeview(logFrame) 
+    logList = ttk.Treeview(logFrame, height=6) 
     logList.grid(column=1, row=2, sticky=W, columnspan=5)
     
     cols = (STRING_DATE, STRING_TIME, STRING_CALL, STRING_SLOT, STRING_TG, STRING_LOSS, STRING_DURATION)
@@ -1444,7 +1447,7 @@ def makeStatusBar( parent ):
 def setStyles():
     style = ttk.Style(root)
     # set ttk theme to "clam" which support the fieldbackground option
-    #style.theme_use("vista")
+    style.theme_use("clam")
     #style.configure('TNotebook.Tab', foreground=uc_text_color, background=uc_background_color)
     style.map('TNotebook.Tab', background=[('disabled', 'magenta')])
     #style.configure('TButton', foreground=uc_text_color, background=uc_background_color)
@@ -1551,7 +1554,7 @@ def popupFocusOut(self,event=None):
 
 root = Tk()
 root.title(STRING_USRP_CLIENT)
-root.resizable(width=FALSE, height=FALSE)
+root.resizable(width=TRUE, height=TRUE)
 
 nb = ttk.Notebook(root)     # A tabbed interface container
 
