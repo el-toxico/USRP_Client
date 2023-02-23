@@ -31,6 +31,7 @@ from tkinter import ttk
 from time import time, sleep, localtime, strftime
 from random import randint
 from tkinter import messagebox
+import sv_ttk
 import socket
 import struct
 import _thread
@@ -105,6 +106,7 @@ tx_start_time = 0                   # TX timer
 done = False                        # Thread stop flag
 transmit_enable = True              # Make sure that UC is half duplex
 ctrl_is_ptt = True                  # Use control key for PTT
+use_dark_theme = True
 useQRZ = True
 level_every_sample = 1
 NAT_ping_timer = 0
@@ -114,8 +116,6 @@ transmitButton = None               # tk object
 logList = None                      # tk object
 macros = {}
 
-uc_background_color = "gray25"
-uc_text_color = "white"
 
 ###################################################################################
 # Strings
@@ -261,9 +261,14 @@ def ping_thread():
 ###################################################################################
 def key_press(key):
     #logging.info("Key pressed: {0}".format(key))
+
+    # Control as PTT button
     if key.keycode == 17 and ctrl_is_ptt:
         if (not ptt):
             toggle_transmit()
+    # T key brings up TG dialog
+    if key.char == 't' or key.char == 'T':
+        tgDialog(False)
             
 def key_release(key):
     #logging.info("Key unpressed: {0}".format(key))
@@ -290,12 +295,11 @@ class MyDialog:
         self.top.grab_set()
 
         top.geometry(win_offset)
-        top.configure(bg=uc_background_color)
 
-        Label(top, text=STRING_TALKGROUP, fg=uc_text_color, bg=uc_background_color).pack()
+        Label(top, text=STRING_TALKGROUP).pack()
         
         if len(macros) == 0:
-            self.e = Entry(top, fg=uc_text_color, bg=uc_background_color)
+            self.e = Entry(top)
         else:
             self.e = ttk.Combobox(top, values=list(macros.values()))
 
@@ -481,7 +485,7 @@ def rxAudioStream():
                     if keyup == False:
                         log_end_of_transmission(call, rxslot, tg, loss, start_time)
                         transmit_enable = True  # Idle state, allow local transmit
-                        transmitButton.configure(background="SystemButtonFace", text=STRING_PTT)
+                        transmitButton.configure(background=ptt_background, text=STRING_PTT)
                         audio_level.set(0)
                 lastKey = keyup
             elif (type == USRP_TYPE_TEXT): #metadata
@@ -542,7 +546,7 @@ def rxAudioStream():
                     if audio[0] == TLV_TAG_SET_INFO:
                         if transmit_enable == False:    #EOT missed?
                             log_end_of_transmission(call, rxslot, tg, loss, start_time)
-                            transmitButton.configure(background="SystemButtonFace", text=STRING_PTT)
+                            transmitButton.configure(background=ptt_background, text=STRING_PTT)
                         rid = (audio[2] << 16) + (audio[3] << 8) + audio[4] # Source
                         tg = (audio[9] << 16) + (audio[10] << 8) + audio[11] # Dest
                         rxslot = audio[12]
@@ -588,7 +592,7 @@ def rxAudioStream():
                         logging.info("missed EOT")
                         log_end_of_transmission(call, rxslot, tg, loss, start_time)
                         transmit_enable = True  # Idle state, allow local transmit
-                        transmitButton.configure(background="SystemButtonFace", text=STRING_PTT)
+                        transmitButton.configure(background=ptt_background, text=STRING_PTT)
                     lastSeq = seq
 #                logging.debug(audio[:audio.find('\x00')])
                 pass
@@ -1109,14 +1113,14 @@ def showPTTState(flag):
     global tx_start_time
     if ptt:
         transmitButton.configure(background="red", text=STRING_TRANSMITTING)
-        ttk.Style(root).configure("bar.Horizontal.TProgressbar", troughcolor=uc_background_color, bordercolor=uc_text_color, background="red", lightcolor="red", darkcolor="red")
+        ttk.Style(root).configure("bar.Horizontal.TProgressbar", background="red", lightcolor="red", darkcolor="red")
         tx_start_time = time()
         current_tx_value.set('{} -> {}'.format(my_call, getCurrentTG()))
         html_queue.put((my_call, ""))     # Show my own pic when I transmit
         logging.info("PTT ON")
     else:
-        transmitButton.configure(background="SystemButtonFace", text=STRING_PTT)
-        ttk.Style(root).configure("bar.Horizontal.TProgressbar", troughcolor=uc_background_color, bordercolor=uc_text_color, background="green", lightcolor="green", darkcolor="green")
+        transmitButton.configure(background=ptt_background, text=STRING_PTT)
+        ttk.Style(root).configure("bar.Horizontal.TProgressbar", background="green", lightcolor="green", darkcolor="green")
         if flag == 1:
             _date = strftime("%m/%d/%y", localtime(time()))
             _time = strftime("%H:%M:%S", localtime(time()))
@@ -1165,7 +1169,7 @@ def cb(value):
 # Create a simple while label 
 ###################################################################################
 def whiteLabel(parent, textVal):
-    l = Label(parent, text=textVal, fg=uc_text_color, bg = uc_background_color, anchor=W)
+    l = Label(parent, text=textVal,  anchor=W)
     return l
 
 ###################################################################################
@@ -1180,7 +1184,7 @@ def tgDialog(popdown_state):
 # 
 ###################################################################################
 def makeModeFrame( parent ):
-    modeFrame = LabelFrame(parent, text = STRING_SERVER, pady = 5, padx = 5, fg=uc_text_color, bg = uc_background_color, bd = 1, relief = SUNKEN)
+    modeFrame = LabelFrame(parent, text = STRING_SERVER, pady = 5, padx = 5,  bd = 1)
     ttk.Button(modeFrame, text=STRING_READ, command=getValuesFromServer).grid(column=1, row=1, sticky=W)
     ttk.Button(modeFrame, text=STRING_WRITE, command=sendValuesToServer).grid(column=1, row=2, sticky=W)
     return modeFrame
@@ -1189,7 +1193,7 @@ def makeModeFrame( parent ):
 #
 ###################################################################################
 def makeAudioFrame( parent ):
-    audioFrame = LabelFrame(parent, text = STRING_AUDIO, pady = 5, padx = 5, fg=uc_text_color, bg = uc_background_color, bd = 1, relief = SUNKEN)
+    audioFrame = LabelFrame(parent, text = STRING_AUDIO, pady = 5, padx = 5,  bd = 1)
     whiteLabel(audioFrame, STRING_MIC).grid(column=1, row=1, sticky=W, padx = 5, pady=1)
     whiteLabel(audioFrame, STRING_SPEAKER).grid(column=1, row=2, sticky=W, padx = 5, pady=1)
     ttk.Scale(audioFrame, from_=0, to=100, orient=HORIZONTAL, variable=mic_vol,
@@ -1203,7 +1207,7 @@ def makeAudioFrame( parent ):
         invar = StringVar(root)
         invar.set(devices[0]) # default value
         inp = OptionMenu(audioFrame, invar, *devices)
-        inp.config(width=20, bg=uc_background_color)
+        inp.config(width=20)
         inp.grid(column=2, row=3, sticky=W)
 
     whiteLabel(audioFrame, STRING_OUTPUT).grid(column=1, row=4, sticky=W, padx = 5)
@@ -1211,7 +1215,7 @@ def makeAudioFrame( parent ):
     outvar = StringVar(root)
     outvar.set(devices[0]) # default value
     out = OptionMenu(audioFrame, outvar, *devices)
-    out.config(width=20, bg=uc_background_color)
+    out.config(width=20)
     out.grid(column=2, row=4, sticky=W)
 
     return audioFrame
@@ -1230,15 +1234,15 @@ def fillTalkgroupList( listName ):
 ###################################################################################
 def makeGroupFrame( parent ):
     global listbox
-    dmrFrame = LabelFrame(parent, text = STRING_TALKGROUPS, pady = 5, padx = 5, fg=uc_text_color, bg = uc_background_color, bd = 1, relief = SUNKEN)
+    dmrFrame = LabelFrame(parent, text = STRING_TALKGROUPS, pady = 5, padx = 5,  bd = 1)
     whiteLabel(dmrFrame, STRING_TS).grid(column=1, row=1, sticky=W, padx = 5)
-    Spinbox(dmrFrame, from_=1, to=2, width = 5, fg=uc_text_color, bg=uc_background_color, textvariable = slot).grid(column=2, row=1, sticky=W)
+    Spinbox(dmrFrame, from_=1, to=2, width = 5, textvariable = slot).grid(column=2, row=1, sticky=W)
     whiteLabel(dmrFrame, STRING_TG).grid(column=1, row=2, sticky=(N, W), padx = 5)
 
     listFrame = Frame(dmrFrame, bd=1, highlightbackground="black", highlightcolor="black", highlightthickness=1)
     listFrame.grid(column=2, row=2, sticky=W, columnspan=2)
-    listbox = Listbox(listFrame, selectmode=EXTENDED, bd=0, bg=uc_background_color)
-    listbox.configure(fg=uc_text_color, exportselection=False)
+    listbox = Listbox(listFrame, selectmode=EXTENDED, bd=0)
+    listbox.configure( exportselection=False)
     listbox.grid(column=1, row=1, sticky=W)
 
     scrollbar = Scrollbar(listFrame, orient="vertical")
@@ -1257,9 +1261,9 @@ def makeGroupFrame( parent ):
 ###################################################################################
 def makeLogFrame( parent ):
     global logList
-    logFrame = Frame(parent, pady = 5, padx = 5, bg = uc_background_color, bd = 1, relief = SUNKEN)
+    logFrame = Frame(parent, pady = 5, padx = 5, bd = 1)
 
-    logList = ttk.Treeview(logFrame)
+    logList = ttk.Treeview(logFrame) 
     logList.grid(column=1, row=2, sticky=W, columnspan=5)
     
     cols = (STRING_DATE, STRING_TIME, STRING_CALL, STRING_SLOT, STRING_TG, STRING_LOSS, STRING_DURATION)
@@ -1281,13 +1285,12 @@ def makeLogFrame( parent ):
 ###################################################################################
 def makeTransmitFrame(parent):
     global transmitButton
-    transmitFrame = Frame(parent, pady = 5, padx = 5, bg = uc_background_color, bd = 1)
+    transmitFrame = Frame(parent, pady = 5, padx = 5, bd = 1)
     transmitButton = Button(transmitFrame, text=STRING_PTT, command=toggle_transmit, width = 40, font='Helvetica 18 bold', state='disabled')
     transmitButton.grid(column=1, row=1, sticky=W)
-    transmitButton.configure(highlightbackground=uc_background_color)
 
 
-    #ttk.Scale(transmitFrame, from_=0, to=100, orient=HORIZONTAL, variable=audio_level,).grid(column=1, row=2, sticky=(W,E), pady=1)
+    #ttk.Scale(transmitFrame, from_=0, to=100, orient=HORIZONTAL, variable=audio_level).grid(column=1, row=2, sticky=(W,E), pady=1)
 
     ttk.Progressbar(transmitFrame, style="bar.Horizontal.TProgressbar", orient=HORIZONTAL, variable=audio_level).grid(column=1, row=2, sticky=(W,E), pady=1)
 
@@ -1305,18 +1308,18 @@ def clickQRZImage(event):
 
 def makeQRZFrame(parent):
     global qrz_label, qrz_call, qrz_name
-    qrzFrame = Frame(parent, bg = uc_background_color, bd = 1)
-    lx = Label(qrzFrame, text="", anchor=W, bg = uc_background_color, cursor="hand2")
+    qrzFrame = Frame(parent, bd = 1)
+    lx = Label(qrzFrame, text="", anchor=W, cursor="hand2")
     lx.grid(column=1, row=1, sticky=W)
     qrz_label = lx
     qrz_label.bind("<Button-1>", clickQRZImage)
 
-    meta_frame = Frame(qrzFrame, bg = uc_background_color, bd = 1)
+    meta_frame = Frame(qrzFrame, bd = 1)
     meta_frame.grid(column=2, row=1, sticky=N)
 
-    qrz_call = Label(meta_frame, textvariable=current_call, anchor=W, fg=uc_text_color, bg = uc_background_color, font='Helvetica 18 bold')
+    qrz_call = Label(meta_frame, textvariable=current_call, anchor=W,  font='Helvetica 18 bold')
     qrz_call.grid(column=1, row=1, sticky=EW)
-    qrz_name = Label(meta_frame, textvariable=current_name, anchor=W, fg=uc_text_color, bg = uc_background_color, font='Helvetica 18 bold')
+    qrz_name = Label(meta_frame, textvariable=current_name, anchor=W,  font='Helvetica 18 bold')
     qrz_name.grid(column=1, row=2, sticky=EW)
 
     return qrzFrame
@@ -1325,7 +1328,7 @@ def makeQRZFrame(parent):
 #
 ###################################################################################
 def makeAppFrame( parent ):
-    appFrame = Frame(parent, pady = 5, padx = 5, bg = uc_background_color, bd = 1, relief = SUNKEN)
+    appFrame = Frame(parent, pady = 5, padx = 5, bd = 1)
     appFrame.grid(column=0, row=0, sticky=(N, W, E, S))
     appFrame.columnconfigure(0, weight=1)
     appFrame.rowconfigure(0, weight=1)
@@ -1342,18 +1345,16 @@ def makeAppFrame( parent ):
 ###################################################################################
 def makeModeSettingsFrame( parent ):
     ypad = 4
-    dmrgroup = LabelFrame(parent, text=STRING_MODE, padx=5, pady=ypad, fg=uc_text_color, bg = uc_background_color, relief = SUNKEN)
+    dmrgroup = LabelFrame(parent, text=STRING_MODE, padx=5, pady=ypad)
     whiteLabel(dmrgroup, "Mode").grid(column=1, row=1, sticky=W, padx = 5, pady = ypad)
     w = OptionMenu(dmrgroup, master, *servers)
     w.grid(column=2, row=1, sticky=W, padx = 5, pady = ypad)
-    w.config(fg=uc_text_color, bg=uc_background_color)
-    w["menu"].config(fg=uc_text_color)
-    w["menu"].config(bg=uc_background_color)
+    w.config()
 
     whiteLabel(dmrgroup, STRING_REPEATER_ID).grid(column=1, row=2, sticky=W, padx = 5, pady = ypad)
-    Entry(dmrgroup, width = 20, bg = uc_background_color, fg=uc_text_color, textvariable = repeater_id).grid(column=2, row=2, pady = ypad)
+    Entry(dmrgroup, width = 20,  textvariable = repeater_id).grid(column=2, row=2, pady = ypad)
     whiteLabel(dmrgroup, STRING_SUBSCRIBER_ID).grid(column=1, row=3, sticky=W, padx = 5, pady = ypad)
-    Entry(dmrgroup, width = 20, bg = uc_background_color, fg=uc_text_color, textvariable = subscriber_id).grid(column=2, row=3, pady = ypad)
+    Entry(dmrgroup, width = 20,  textvariable = subscriber_id).grid(column=2, row=3, pady = ypad)
 
     return dmrgroup
 
@@ -1362,13 +1363,13 @@ def makeModeSettingsFrame( parent ):
 ###################################################################################
 def makeVoxSettingsFrame( parent ):
     ypad = 4
-    voxSettings = LabelFrame(parent, text=STRING_VOX, padx=5, pady = ypad, fg=uc_text_color, bg = uc_background_color, relief = SUNKEN) 
-    Checkbutton(voxSettings, text = STRING_DONGLE_MODE, variable=dongle_mode, command=lambda: cb(dongle_mode), fg=uc_text_color, bg = uc_background_color, bd = 0, highlightthickness = 0).grid(column=1, row=1, sticky=W)
-    Checkbutton(voxSettings, text = STRING_VOX_ENABLE, variable=vox_enable, command=lambda: cb(vox_enable), fg=uc_text_color, bg = uc_background_color, bd = 0, highlightthickness = 0).grid(column=1, row=2, sticky=W)
+    voxSettings = LabelFrame(parent, text=STRING_VOX, padx=5, pady = ypad)
+    Checkbutton(voxSettings, text = STRING_DONGLE_MODE, variable=dongle_mode, command=lambda: cb(dongle_mode),  bd = 0, highlightthickness = 0).grid(column=1, row=1, sticky=W)
+    Checkbutton(voxSettings, text = STRING_VOX_ENABLE, variable=vox_enable, command=lambda: cb(vox_enable),  bd = 0, highlightthickness = 0).grid(column=1, row=2, sticky=W)
     whiteLabel(voxSettings, STRING_VOX_THRESHOLD).grid(column=1, row=3, sticky=W, padx = 5, pady = ypad)
-    Spinbox(voxSettings, from_=1, to=32767, width = 5, fg=uc_text_color, bg=uc_background_color, textvariable = vox_threshold).grid(column=2, row=3, sticky=W, pady = ypad)
+    Spinbox(voxSettings, from_=1, to=32767, width = 5, textvariable = vox_threshold).grid(column=2, row=3, sticky=W, pady = ypad)
     whiteLabel(voxSettings, STRING_VOX_DELAY).grid(column=1, row=4, sticky=W, padx = 5, pady = ypad)
-    Spinbox(voxSettings, from_=1, to=500, width = 5, fg=uc_text_color, bg=uc_background_color, textvariable = vox_delay).grid(column=2, row=4, sticky=W, pady = ypad)
+    Spinbox(voxSettings, from_=1, to=500, width = 5, textvariable = vox_delay).grid(column=2, row=4, sticky=W, pady = ypad)
 
     return voxSettings
 
@@ -1377,17 +1378,17 @@ def makeVoxSettingsFrame( parent ):
 ###################################################################################
 def makeIPSettingsFrame( parent ):
     ypad = 4
-    ipSettings = LabelFrame(parent, text=STRING_NETWORK, padx=5, pady = ypad, fg=uc_text_color, bg = uc_background_color, relief = SUNKEN)
-    Checkbutton(ipSettings, text = STRING_LOOPBACK, variable=loopback, command=lambda: cb(loopback), fg=uc_text_color, bg = uc_background_color, bd = 0, highlightthickness = 0).grid(column=1, row=1, sticky=W)
+    ipSettings = LabelFrame(parent, text=STRING_NETWORK, padx=5, pady = ypad)
+    Checkbutton(ipSettings, text = STRING_LOOPBACK, variable=loopback, command=lambda: cb(loopback),  bd = 0, highlightthickness = 0).grid(column=1, row=1, sticky=W)
     whiteLabel(ipSettings, STRING_IP_ADDRESS).grid(column=1, row=2, sticky=W, padx = 5, pady = ypad)
-    Entry(ipSettings, width = 20, fg=uc_text_color, bg=uc_background_color, textvariable = ip_address).grid(column=2, row=2, pady = ypad)
+    Entry(ipSettings, width = 20, textvariable = ip_address).grid(column=2, row=2, pady = ypad)
     return ipSettings
 
 ###################################################################################
 #
 ###################################################################################
 def makeSettingsFrame( parent ):
-    settingsFrame = Frame(parent, width = 500, height = 500,pady = 5, padx = 5, bg = uc_background_color, bd = 1, relief = SUNKEN)
+    settingsFrame = Frame(parent, width = 500, height = 500,pady = 5, padx = 5, bd = 1)
     makeModeFrame(settingsFrame).grid(column=1, row=1, sticky=(N,W), padx = 5)
     makeIPSettingsFrame(settingsFrame).grid(column=2, row=1, sticky=(N,W), padx = 5, pady = 5, columnspan=2)
     makeVoxSettingsFrame(settingsFrame).grid(column=1, row=2, sticky=(N,W), padx = 5)
@@ -1398,7 +1399,7 @@ def makeSettingsFrame( parent ):
 #
 ###################################################################################
 def makeAboutFrame( parent ):
-    aboutFrame = Frame(parent, width = parent.winfo_width(), height = parent.winfo_height(),pady = 5, padx = 5, bg = uc_background_color, bd = 1, relief = SUNKEN)
+    aboutFrame = Frame(parent, width = parent.winfo_width(), height = parent.winfo_height(),pady = 5, padx = 5, bd = 1)
     aboutText = "USRP Client (pyUC) Version " + UC_VERSION + "\n"
     aboutText += "(C) 2019, 2020 DVSwitch, INAD.\n"
     aboutText += "Created by Mike N4IRR and Steve N4IRS\n"
@@ -1414,7 +1415,7 @@ def makeAboutFrame( parent ):
     aboutText += "this fork also comes with ABSOLUTELY NO WARRANTY\n\n"
 
     background = None
-    msg = Message(aboutFrame, text=aboutText, fg=uc_text_color, bg = uc_background_color, anchor=W, width=500)
+    msg = Message(aboutFrame, text=aboutText,  anchor=W, width=500)
     msg.grid(column=2, row=1, sticky=NW, padx = 5, pady = 0)
 
     return aboutFrame
@@ -1432,10 +1433,10 @@ def update_clock(obj):
 ###################################################################################
 def makeStatusBar( parent ):
     w = 25
-    statusBar = Frame(parent, pady = 5, padx = 5, bg = uc_background_color)
-    Label(statusBar, fg=uc_text_color, bg = uc_background_color, textvariable=connected_msg, anchor='w', width = w).grid(column=1, row=1, sticky=W)
-    Label(statusBar, fg=uc_text_color, bg = uc_background_color, textvariable=current_tx_value, anchor='center', width = w).grid(column=2, row=1, sticky=N)
-    obj = Label(statusBar, fg=uc_text_color, bg = uc_background_color, text="", anchor='e', width = w)
+    statusBar = Frame(parent, pady = 5, padx = 5)
+    Label(statusBar,  textvariable=connected_msg, anchor='w', width = w).grid(column=1, row=1, sticky=W)
+    Label(statusBar,  textvariable=current_tx_value, anchor='center', width = w).grid(column=2, row=1, sticky=N)
+    obj = Label(statusBar,  text="", anchor='e', width = w)
     obj.grid(column=3, row=1, sticky=E)
     root.after(1000, update_clock, obj)
     return statusBar
@@ -1443,12 +1444,11 @@ def makeStatusBar( parent ):
 def setStyles():
     style = ttk.Style(root)
     # set ttk theme to "clam" which support the fieldbackground option
-    style.theme_use("clam")
-    style.configure("Treeview", background=uc_background_color, fieldbackground=uc_background_color, foreground=uc_text_color)
-    style.configure('TNotebook.Tab', foreground=uc_text_color, background=uc_background_color)
+    #style.theme_use("vista")
+    #style.configure('TNotebook.Tab', foreground=uc_text_color, background=uc_background_color)
     style.map('TNotebook.Tab', background=[('disabled', 'magenta')])
-    style.configure('TButton', foreground=uc_text_color, background=uc_background_color)
-    style.configure("bar.Horizontal.TProgressbar", troughcolor=uc_background_color, bordercolor=uc_text_color, background="green", lightcolor="green", darkcolor="green")
+    #style.configure('TButton', foreground=uc_text_color, background=uc_background_color)
+    style.configure("bar.Horizontal.TProgressbar", background="green", lightcolor="green", darkcolor="green")
 
 ###################################################################################
 # Read an int value from the ini file.  If an error or value is Default, return the 
@@ -1552,7 +1552,6 @@ def popupFocusOut(self,event=None):
 root = Tk()
 root.title(STRING_USRP_CLIENT)
 root.resizable(width=FALSE, height=FALSE)
-root.configure(bg=uc_background_color)
 
 nb = ttk.Notebook(root)     # A tabbed interface container
 
@@ -1645,5 +1644,11 @@ start()         # Begin the handshake with AB (register)
 root.bind('<KeyPress>', key_press)
 root.bind('<KeyRelease>', key_release)
 root.protocol("WM_DELETE_WINDOW", on_closing)
+if use_dark_theme:
+    sv_ttk.set_theme("dark")
+else:
+    sv_ttk.set_theme("light")
+ptt_background = transmitButton.cget("background")
+ptt_foreground = transmitButton.cget("fg")
 root.mainloop()
 
