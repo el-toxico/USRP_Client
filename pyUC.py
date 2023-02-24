@@ -1238,14 +1238,14 @@ def fillTalkgroupList( listName ):
 def makeGroupFrame( parent ):
     global listbox
     dmrFrame = LabelFrame(parent, text = STRING_TALKGROUPS, pady = 5, padx = 5,  bd = 1)
-    whiteLabel(dmrFrame, STRING_TS).grid(column=1, row=1, sticky=W, padx = 5)
-    Spinbox(dmrFrame, from_=1, to=2, width = 5, textvariable = slot).grid(column=2, row=1, sticky=W)
+    #whiteLabel(dmrFrame, STRING_TS).grid(column=1, row=1, sticky=W, padx = 5)
+    #Spinbox(dmrFrame, from_=1, to=2, width = 5, textvariable = slot).grid(column=2, row=1, sticky=W)
     whiteLabel(dmrFrame, STRING_TG).grid(column=1, row=2, sticky=(N, W), padx = 5)
 
     listFrame = Frame(dmrFrame, bd=1, highlightbackground="black", highlightcolor="black", highlightthickness=1)
     listFrame.grid(column=2, row=2, sticky=W, columnspan=2)
-    listbox = Listbox(listFrame, selectmode=EXTENDED, bd=0)
-    listbox.configure( exportselection=False)
+    listbox = Listbox(listFrame, selectmode=EXTENDED, bd=0, height=7)
+    listbox.configure(exportselection=False)
     listbox.grid(column=1, row=1, sticky=W)
 
     scrollbar = Scrollbar(listFrame, orient="vertical")
@@ -1336,10 +1336,10 @@ def makeAppFrame( parent ):
     appFrame.columnconfigure(0, weight=1)
     appFrame.rowconfigure(0, weight=1)
 
-    makeModeSettingsFrame(appFrame).grid(column=0, row=1, sticky=(N,W), padx = 5)
-    makeQRZFrame(appFrame).grid(column=0, row=2, sticky=W, padx=5)
-    makeGroupFrame(appFrame).grid(column=2, row=1, sticky=N, rowspan=2)
-    makeTransmitFrame(appFrame).grid(column=0, row=3, sticky=N, columnspan=3, pady = 10)
+    makeModeSettingsFrame(appFrame).grid(column=0, row=0, sticky=(N,W), padx = 5)
+    makeQRZFrame(appFrame).grid(column=0, row=1, sticky=W, padx=5)
+    makeGroupFrame(appFrame).grid(column=2, row=0, sticky=N, rowspan=2)
+    makeTransmitFrame(appFrame).grid(column=0, row=2, sticky=N, columnspan=3, pady = 10)
 
     return appFrame
 
@@ -1354,10 +1354,10 @@ def makeModeSettingsFrame( parent ):
     w.grid(column=2, row=1, sticky=W, padx = 5, pady = ypad)
     w.config()
 
-    whiteLabel(dmrgroup, STRING_REPEATER_ID).grid(column=1, row=2, sticky=W, padx = 5, pady = ypad)
-    Entry(dmrgroup, width = 20,  textvariable = repeater_id).grid(column=2, row=2, pady = ypad)
-    whiteLabel(dmrgroup, STRING_SUBSCRIBER_ID).grid(column=1, row=3, sticky=W, padx = 5, pady = ypad)
-    Entry(dmrgroup, width = 20,  textvariable = subscriber_id).grid(column=2, row=3, pady = ypad)
+    #whiteLabel(dmrgroup, STRING_REPEATER_ID).grid(column=1, row=2, sticky=W, padx = 5, pady = ypad)
+    #Entry(dmrgroup, width = 20,  textvariable = repeater_id).grid(column=2, row=2, pady = ypad)
+    #whiteLabel(dmrgroup, STRING_SUBSCRIBER_ID).grid(column=1, row=3, sticky=W, padx = 5, pady = ypad)
+    #Entry(dmrgroup, width = 20,  textvariable = subscriber_id).grid(column=2, row=3, pady = ypad)
 
     return dmrgroup
 
@@ -1391,7 +1391,7 @@ def makeIPSettingsFrame( parent ):
 #
 ###################################################################################
 def makeSettingsFrame( parent ):
-    settingsFrame = Frame(parent, width = 500, height = 500,pady = 5, padx = 5, bd = 1)
+    settingsFrame = Frame(parent, width = 500, height = 400,pady = 5, padx = 5, bd = 1)
     makeModeFrame(settingsFrame).grid(column=1, row=1, sticky=(N,W), padx = 5)
     makeIPSettingsFrame(settingsFrame).grid(column=2, row=1, sticky=(N,W), padx = 5, pady = 5, columnspan=2)
     makeVoxSettingsFrame(settingsFrame).grid(column=1, row=2, sticky=(N,W), padx = 5)
