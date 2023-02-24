@@ -1584,6 +1584,7 @@ try:
     defaultServer = config.get('DEFAULTS', "defaultServer").split(None)[0]
     asl_mode = makeTkVar(IntVar, config.get('DEFAULTS', "aslMode").split(None)[0])
     useQRZ = bool(readValue(config, 'DEFAULTS', 'useQRZ', True, int))
+    use_dark_theme = bool(readValue(config, 'DEFAULTS', 'use_dark_theme', True, int))
     level_every_sample = int(readValue(config, 'DEFAULTS', 'levelEverySample', 2, int))
     NAT_ping_timer = int(readValue(config, 'DEFAULTS', 'pingTimer', 0, int))
 
